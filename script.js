@@ -106,9 +106,10 @@ $(function () {
         if (cart.length === 0) {
             cartContainer.html('<p>No items in the cart.</p>');
             totalPrice = 0; // Toplam fiyatı sıfırla
+            totalPriceContainer.html(totalPrice.toFixed(2)); // Toplam fiyatı güncelle
         } else {
             cartContainer.html('');
-
+    
             cart.forEach(function (item, index) {
                 let cartItem = `
                     <div class="cart-item mb-2">
@@ -119,21 +120,25 @@ $(function () {
                 `;
                 cartContainer.append(cartItem);
             });
-
-            totalPriceContainer.text(totalPrice);
+    
+            totalPriceContainer.html(totalPrice.toFixed(2)); // Toplam fiyatı güncelle
         }
-
-        // LocalStorage'da güncelle
-        localStorage.setItem('cart', JSON.stringify(cart));
-        localStorage.setItem('totalPrice', JSON.stringify(totalPrice));
-
+    
+        // Ürün silme butonuna tıklayınca miktarı azalt
         $('.remove-from-cart').on('click', function () {
             const itemIndex = $(this).data('index');
             const removedItem = cart[itemIndex];
-
+    
             if (removedItem) {
-                totalPrice -= removedItem.price * removedItem.quantity; // Toplam fiyattan ürün fiyatını çıkar
-                cart.splice(itemIndex, 1); // Ürünü sepetten çıkar
+                // Ürünün miktarı 1'den fazlaysa azalt
+                if (removedItem.quantity > 1) {
+                    removedItem.quantity -= 1;
+                    totalPrice -= removedItem.price; // Toplam fiyattan ürünün fiyatını çıkar
+                } else {
+                    // Ürünün miktarı 1 ise ürünü sepetten çıkar
+                    totalPrice -= removedItem.price * removedItem.quantity;
+                    cart.splice(itemIndex, 1);
+                }
                 updateCart(); // Sepeti yeniden güncelle
 
                 // LocalStorage'dan sepeti ve toplam fiyatı güncelle
